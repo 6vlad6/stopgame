@@ -3,6 +3,7 @@ import httpx
 from bs4 import BeautifulSoup
 import re
 import time
+import os
 
 from tqdm import tqdm
 
@@ -46,6 +47,9 @@ async def load_to_csv(data: list, fieldnames: list, data_type: str):
     :return:
     """
     unixtime = int(time.time())  # время создания файла в unix-формате
+
+    if not os.path.exists(data_type):  # если папки нет, то создать ее
+        os.makedirs(data_type)
 
     # создание нового файла: data_type - папка файла, data_type[0] - флажок по первой букве папки для различия файлов
     file_name = f'{data_type}/{unixtime}_{data_type[0]}.csv'
@@ -111,9 +115,9 @@ async def parse_games():
 
             all_games = []
 
-            with tqdm(total=3, desc='Прогресс') as pbar:
+            with tqdm(total=pages, desc='Прогресс') as pbar:
 
-                for i in range(1, 4):
+                for i in range(1, pages+1):
 
                     resp = await client.get(GAMES_CATALOG_URL.format(i))
                     page_data = BeautifulSoup(resp.text, 'html.parser')
@@ -159,9 +163,9 @@ async def parse_blogs():
 
             all_blogs = []
 
-            with tqdm(total=3, desc='Прогресс') as pbar:
+            with tqdm(total=pages, desc='Прогресс') as pbar:
 
-                for i in range(1, 4):
+                for i in range(1, pages+1):
 
                     resp = await client.get(BLOGS_URL.format(i))
                     page_data = BeautifulSoup(resp.text, 'html.parser')
@@ -219,9 +223,9 @@ async def parse_news():
 
             all_news = []
 
-            with tqdm(total=3, desc='Прогресс') as pbar:
+            with tqdm(total=pages, desc='Прогресс') as pbar:
 
-                for i in range(1, 4):
+                for i in range(1, pages+1):
 
                     resp = await client.get(NEWS_URL.format(i))
                     page_data = BeautifulSoup(resp.text, 'html.parser')
@@ -256,4 +260,3 @@ async def parse_news():
             pass
 
         return file_name
-
